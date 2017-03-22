@@ -56,6 +56,6 @@ public class TaskTest {
   public void find_returnsTaskWithSameId_secondTask() {
     Task firstTask = new Task("Mow the lawn");
     Task secondTask = new Task("Buy groceries");
-    assertEquals(Task.find(secondTask.getId()), secondTask);
+    assertEquals(secondTask, Task.find(secondTask.getId()));
   }
 }
