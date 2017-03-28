@@ -1,7 +1,7 @@
 <!--category-tasks-form.vtl-->
 <h1>Add a task to $category.getName()</h1>
 
-<form action="/tasks" method="post">
+<form action="/categories/$category.getId()/tasks/$task.getId()" method="post">
   <input id="categoryId" name="categoryId" type="hidden" value="$category.getId()">
 
   <div class="form-group">
