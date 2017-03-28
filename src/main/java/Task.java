@@ -1,47 +1,73 @@
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import org.sql2o.*;
 import java.util.List;
 
 public class Task {
-  private String mDescription;
-  private boolean mCompleted;
-  private LocalDateTime mCreatedAt;
-  private static List<Task> instances = new ArrayList<Task>();
-  private int mId;
+  private String description;
+  private boolean completed;
+  private LocalDateTime createdAt;
+  private int id;
 
   public Task(String description){
-    mDescription = description;
-    mCompleted = false;
-    mCreatedAt = LocalDateTime.now();
-    instances.add(this);
-    mId = instances.size();
-  }
-
-  public String getDescription() {
-    return mDescription;
-  }
-
-  public boolean isCompleted() {
-    return mCompleted;
-  }
-
-  public LocalDateTime getCreatedAt() {
-    return mCreatedAt;
+    this.description = description;
+    completed = false;
+    createdAt = LocalDateTime.now();
   }
 
   public static List<Task> all() {
-    return instances;
+    String sql = "SELECT id, description FROM tasks";
+    try(Connection con = DB.sql2o.open()) {
+      return con.createQuery(sql).executeAndFetch(Task.class);
+    }
   }
 
-  public static void clear() {
-    instances.clear();
+  public void save() {
+    try(Connection con = DB.sql2o.open()) {
+      String sql = "INSERT INTO tasks (description) VALUES (:description)";
+      this.id= (int) con.createQuery(sql, true)
+        .addParameter("description", this.description)
+        .executeUpdate()
+        .getKey();
+    }
   }
 
-  public int getId() {
-    return mId;
+  @Override
+  public boolean equals(Object otherTask) {
+    if(!(otherTask instanceof Task)) {
+      return false;
+    } else {
+      Task newTask = (Task) otherTask;
+      return this.getDescription().equals(newTask.getDescription()) &&
+             this.getId() == newTask.getId();
+    }
   }
 
   public static Task find(int id) {
-    return instances.get(id - 1);
+    try(Connection con = DB.sql2o.open()) {
+      String sql = "SELECT * FROM tasks where id=:id";
+      Task task = con.createQuery(sql)
+        .addParameter("id", id)
+        .executeAndFetchFirst(Task.class);
+      return task;
+    }
   }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public boolean isCompleted() {
+    return completed;
+  }
+
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
+  }
+
+  public int getId() {
+    return id;
+  }
+
+  // public static Task find(int id) {
+  // }
 }
